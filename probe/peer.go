@@ -57,6 +57,10 @@ func (p *Peer) Ping(count int, wg *sync.WaitGroup) {
 		}
 		p.samples[p.lastIndex] = sample
 	}
+	err = pinger.Run()
+	if err != nil {
+		panic(err)
+	}
 }
 
 func (p *Peer) LastSample() Sample {

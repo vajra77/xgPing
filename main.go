@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"sync"
+	"time"
 	"xgPing/probe"
 )
 
@@ -37,6 +38,8 @@ func main() {
 		}
 
 		wg.Wait()
+
+		time.Sleep(30 * time.Second)
 
 		for _, peer := range peers {
 			last := peer.LastSample()

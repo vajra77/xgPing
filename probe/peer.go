@@ -2,6 +2,7 @@ package probe
 
 import (
 	"sync"
+	"time"
 
 	probing "github.com/prometheus-community/pro-bing"
 )
@@ -43,13 +44,15 @@ func (p *Peer) Ping(count int, wg *sync.WaitGroup) {
 	}
 	pinger.SetPrivileged(true)
 	pinger.Count = count
+	pinger.Timeout = 3 * time.Second
+	pinger.TTL = 1
 	pinger.OnFinish = func(stats *probing.Statistics) {
 		sample := MakeSample(
 			1000*stats.MinRtt.Seconds(),
 			1000*stats.MaxRtt.Seconds(),
 			1000*stats.AvgRtt.Seconds(),
 			1000*stats.StdDevRtt.Seconds(),
-			100*stats.PacketLoss,
+			stats.PacketLoss,
 		)
 		if p.lastIndex >= 10 {
 			p.lastIndex = 0

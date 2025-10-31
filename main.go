@@ -10,15 +10,6 @@ import (
 	"xgPing/probe"
 )
 
-func importDummyPeers() ([]*probe.Peer, error) {
-	result := make([]*probe.Peer, 0)
-	result = append(result, probe.NewPeer("Namex", "namex", "193.201.28.100",
-		"2001:7f8:10::2:4796"))
-	result = append(result, probe.NewPeer("AS112", "as112", "193.201.28.112",
-		"2001:7f8:10::112"))
-	return result, nil
-}
-
 func importCSVPeers(filename string) ([]*probe.Peer, error) {
 	result := make([]*probe.Peer, 0)
 
@@ -26,7 +17,12 @@ func importCSVPeers(filename string) ([]*probe.Peer, error) {
 	if err != nil {
 		return result, err
 	}
-	defer file.Close()
+	defer func(file *os.File) {
+		err := file.Close()
+		if err != nil {
+			fmt.Printf("[W] Error closing file: %s\n", err)
+		}
+	}(file)
 
 	reader := csv.NewReader(file)
 	reader.Comma = ';'
@@ -72,7 +68,7 @@ func main() {
 
 		for _, peer := range peers {
 			last := peer.LastSample()
-			fmt.Printf("=== Last Statistics for peer: %s (%s) ===\n", peer.Name(), peer.V4Address())
+			fmt.Printf("Peer: %s (%s) Node: %s | ", peer.Name(), peer.V4Address(), peer.Node())
 			fmt.Printf("RTT min: %.2f, max: %.2f, avg: %.2f, dev: %.2f ms | LOSS: %.2f %%\n",
 				last.Min(), last.Max(), last.Avg(), last.StdDev(), last.Loss())
 		}

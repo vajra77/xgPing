@@ -8,7 +8,7 @@ import (
 
 type Peer struct {
 	name      string
-	code      string
+	node      string
 	v4Address string
 	v6Address string
 	samples   [10]Sample
@@ -23,8 +23,8 @@ func (p *Peer) Name() string {
 	return p.name
 }
 
-func (p *Peer) Code() string {
-	return p.code
+func (p *Peer) Node() string {
+	return p.node
 }
 
 func (p *Peer) V4Address() string {

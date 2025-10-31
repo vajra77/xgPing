@@ -1,6 +1,8 @@
 package probe
 
 import (
+	"sync"
+
 	probing "github.com/prometheus-community/pro-bing"
 )
 
@@ -33,7 +35,8 @@ func (p *Peer) V6Address() string {
 	return p.v6Address
 }
 
-func (p *Peer) Ping(count int) {
+func (p *Peer) Ping(count int, wg *sync.WaitGroup) {
+	defer wg.Done()
 	pinger, err := probing.NewPinger(p.v4Address)
 	if err != nil {
 		panic(err)

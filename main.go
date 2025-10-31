@@ -3,7 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
-	"time"
+	"sync"
 	"xgPing/probe"
 )
 
@@ -12,6 +12,8 @@ func parseUrl(url string) ([]*probe.Peer, error) {
 	result := make([]*probe.Peer, 0)
 	result = append(result, probe.NewPeer("Namex", "namex", "193.201.28.100",
 		"2001:7f8:10::2:4796"))
+	result = append(result, probe.NewPeer("AS112", "as112", "193.201.28.112",
+		"2001:7f8:10::112"))
 	return result, nil
 }
 
@@ -27,12 +29,14 @@ func main() {
 
 	for {
 		// main peers loop
+		wg := sync.WaitGroup{}
+
 		for _, peer := range peers {
-			fmt.Printf("Pinging peer: %s\n", peer.Name())
-			go peer.Ping(*count)
+			wg.Add(1)
+			go peer.Ping(*count, &wg)
 		}
 
-		time.Sleep(30 * time.Second)
+		wg.Wait()
 
 		for _, peer := range peers {
 			last := peer.LastSample()

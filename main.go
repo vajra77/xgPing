@@ -60,10 +60,14 @@ func main() {
 	}
 
 	wg.Wait()
-	fmt.Println("PEER;NODE;IPV4;COUNT;RTT_MIN;RTT_MAX;RTT_AVG;RTT_STDEV;LOSS")
+	fmt.Println("PEER;NODE;IPV4;COUNT;RTT_MIN;RTT_MAX;RTT_AVG;RTT_STDEV;LOSS;STATUS")
 	for _, peer := range peers {
 		last := peer.LastSample()
-		fmt.Printf("%s;%s;%s;%d;%.2f;%.2f;%.2f;%.2f;%.2f\n", peer.Name(), peer.Node(), peer.V4Address(), *count,
-			last.Min(), last.Max(), last.Avg(), last.StdDev(), last.Loss())
+		status := "OK"
+		if last.Loss() > 0 {
+			status = "WARN"
+		}
+		fmt.Printf("%s;%s;%s;%d;%.2f;%.2f;%.2f;%.2f;%.2f;%s\n", peer.Name(), peer.Node(), peer.V4Address(), *count,
+			last.Min(), last.Max(), last.Avg(), last.StdDev(), last.Loss(), status)
 	}
 }

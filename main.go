@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"sync"
+	"time"
 	"xgPing/probe"
 )
 
@@ -57,6 +58,7 @@ func main() {
 	for _, peer := range peers {
 		wg.Add(1)
 		go peer.Ping(*count, &wg)
+		time.Sleep(5 * time.Millisecond)
 	}
 
 	wg.Wait()

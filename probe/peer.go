@@ -45,7 +45,7 @@ func (p *Peer) Ping(count int, wg *sync.WaitGroup) {
 	pinger.SetPrivileged(true)
 	pinger.Count = count
 	pinger.Timeout = 3 * time.Second
-	pinger.TTL = 1
+	//pinger.TTL = 1
 	pinger.OnFinish = func(stats *probing.Statistics) {
 		sample := MakeSample(
 			1000*stats.MinRtt.Seconds(),

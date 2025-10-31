@@ -9,6 +9,7 @@ if __name__ == '__main__':
     ixp_id = sys.argv[2]
     vlan_id = sys.argv[3]
 
+    print(f"Requesting: {ixf_url}")
     response = requests.get(ixf_url)
     data = response.json()
 

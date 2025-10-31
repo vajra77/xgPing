@@ -11,12 +11,12 @@ type Peer struct {
 	code      string
 	v4Address string
 	v6Address string
-	samples   [10]*Sample
+	samples   [10]Sample
 	lastIndex int
 }
 
 func NewPeer(name, code, v4Address, v6Address string) *Peer {
-	return &Peer{name, code, v4Address, v6Address, [10]*Sample{}, 0}
+	return &Peer{name, code, v4Address, v6Address, [10]Sample{}, 0}
 }
 
 func (p *Peer) Name() string {
@@ -43,7 +43,7 @@ func (p *Peer) Ping(count int, wg *sync.WaitGroup) {
 	}
 	pinger.Count = count
 	pinger.OnFinish = func(stats *probing.Statistics) {
-		sample := NewSample(
+		sample := MakeSample(
 			1000*stats.MinRtt.Seconds(),
 			1000*stats.MaxRtt.Seconds(),
 			1000*stats.AvgRtt.Seconds(),
@@ -59,6 +59,6 @@ func (p *Peer) Ping(count int, wg *sync.WaitGroup) {
 	}
 }
 
-func (p *Peer) LastSample() *Sample {
+func (p *Peer) LastSample() Sample {
 	return p.samples[p.lastIndex]
 }

@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"os"
 	"sync"
-	"time"
 	"xgPing/probe"
 )
 
@@ -53,24 +52,19 @@ func main() {
 		os.Exit(1)
 	}
 
-	for {
-		// main peers loop
-		wg := sync.WaitGroup{}
+	wg := sync.WaitGroup{}
 
-		for _, peer := range peers {
-			wg.Add(1)
-			go peer.Ping(*count, &wg)
-		}
+	for _, peer := range peers {
+		wg.Add(1)
+		go peer.Ping(*count, &wg)
+	}
 
-		wg.Wait()
+	wg.Wait()
 
-		time.Sleep(30 * time.Second)
-
-		for _, peer := range peers {
-			last := peer.LastSample()
-			fmt.Printf("Peer: %s (%s) Node: %s | ", peer.Name(), peer.V4Address(), peer.Node())
-			fmt.Printf("RTT min: %.2f, max: %.2f, avg: %.2f, dev: %.2f ms | LOSS: %.2f %%\n",
-				last.Min(), last.Max(), last.Avg(), last.StdDev(), last.Loss())
-		}
+	for _, peer := range peers {
+		last := peer.LastSample()
+		fmt.Printf("Peer: %s (%s) Node: %s | ", peer.Name(), peer.V4Address(), peer.Node())
+		fmt.Printf("RTT min: %.2f, max: %.2f, avg: %.2f, dev: %.2f ms | LOSS: %.2f %%\n",
+			last.Min(), last.Max(), last.Avg(), last.StdDev(), last.Loss())
 	}
 }

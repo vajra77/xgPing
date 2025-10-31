@@ -19,7 +19,7 @@ func main() {
 
 	// parse command line arguments
 	url := flag.String("json", "", "JSON IXP-F File")
-	count := flag.Int("count", 0, "Number of ICMP pings to send")
+	count := flag.Int("count", 10, "Number of ICMP pings to send")
 	flag.Parse()
 
 	// retrieve peers from json file
@@ -28,6 +28,7 @@ func main() {
 	for {
 		// main peers loop
 		for _, peer := range peers {
+			fmt.Printf("Pinging peer: %s\n", peer.Name())
 			go peer.Ping(*count)
 		}
 

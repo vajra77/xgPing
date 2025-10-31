@@ -44,6 +44,7 @@ func main() {
 	// parse command line arguments
 	csvFile := flag.String("csv", "peers.csv", "Peer list in CSV format")
 	count := flag.Int("count", 10, "Number of ICMP pings to send")
+	ttl := flag.Int("ttl", 1, "TTL for ICMP pings")
 	flag.Parse()
 
 	// retrieve peers from json file
@@ -57,7 +58,7 @@ func main() {
 
 	for _, peer := range peers {
 		wg.Add(1)
-		go peer.Ping(*count, &wg)
+		go peer.Ping(*count, *ttl, &wg)
 		time.Sleep(5 * time.Millisecond)
 	}
 

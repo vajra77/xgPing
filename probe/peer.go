@@ -36,7 +36,7 @@ func (p *Peer) V6Address() string {
 	return p.v6Address
 }
 
-func (p *Peer) Ping(count int, wg *sync.WaitGroup) {
+func (p *Peer) Ping(count int, ttl int, wg *sync.WaitGroup) {
 	defer wg.Done()
 	pinger, err := probing.NewPinger(p.v4Address)
 	if err != nil {
@@ -45,7 +45,7 @@ func (p *Peer) Ping(count int, wg *sync.WaitGroup) {
 	pinger.SetPrivileged(true)
 	pinger.Count = count
 	pinger.Timeout = 3 * time.Second
-	pinger.TTL = 1
+	pinger.TTL = ttl
 	pinger.OnFinish = func(stats *probing.Statistics) {
 		sample := MakeSample(
 			1000*stats.MinRtt.Seconds(),

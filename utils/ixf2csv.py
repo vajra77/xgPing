@@ -6,10 +6,9 @@ SWITCHES = {}
 if __name__ == '__main__':
 
     ixf_url = sys.argv[1]
-    ixp_id = sys.argv[2]
-    vlan_id = sys.argv[3]
+    ixp_id = int(sys.argv[2])
+    vlan_id = int(sys.argv[3])
 
-    print(f"Requesting: {ixf_url}")
     response = requests.get(ixf_url)
     data = response.json()
 
@@ -25,8 +24,12 @@ if __name__ == '__main__':
             if c['ixp_id'] == ixp_id:
                 for v in c['vlan_list']:
                     if v['vlan_id'] == vlan_id:
-                        v4address = v.get('ipv4').get('address')
-                        v6address = v.get('ipv6').get('address')
-                        switch_id = c["if_list"][0]['switch_id']
-                        switch_name = SWITCHES[switch_id]
-                        print(f"{member_name};{switch_name};{v4address};{v6address}")
+                        if v.get('ipv4') is not None:
+                            v4address = v.get('ipv4').get('address')
+                            if v.get('ipv6') is not None:
+                                v6address = v.get('ipv6').get('address')
+                            else:
+                                v6address = "::1"
+                            switch_id = c["if_list"][0]['switch_id']
+                            switch_name = SWITCHES[switch_id]
+                            print(f"{member_name};{switch_name};{v4address};{v6address}")

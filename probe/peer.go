@@ -41,6 +41,7 @@ func (p *Peer) Ping(count int, wg *sync.WaitGroup) {
 	if err != nil {
 		panic(err)
 	}
+	pinger.SetPrivileged(true)
 	pinger.Count = count
 	pinger.OnFinish = func(stats *probing.Statistics) {
 		sample := MakeSample(

@@ -1,15 +1,16 @@
 package main
 
 import (
+	"encoding/csv"
 	"flag"
 	"fmt"
+	"os"
 	"sync"
 	"time"
 	"xgPing/probe"
 )
 
-func parseUrl(url string) ([]*probe.Peer, error) {
-	fmt.Printf("url: %s\n", url)
+func importDummyPeers() ([]*probe.Peer, error) {
 	result := make([]*probe.Peer, 0)
 	result = append(result, probe.NewPeer("Namex", "namex", "193.201.28.100",
 		"2001:7f8:10::2:4796"))
@@ -18,15 +19,43 @@ func parseUrl(url string) ([]*probe.Peer, error) {
 	return result, nil
 }
 
+func importCSVPeers(filename string) ([]*probe.Peer, error) {
+	result := make([]*probe.Peer, 0)
+
+	file, err := os.Open(filename)
+	if err != nil {
+		return result, err
+	}
+	defer file.Close()
+
+	reader := csv.NewReader(file)
+	reader.Comma = ';'
+
+	records, err := reader.ReadAll()
+	if err != nil {
+		return result, err
+	}
+	for _, r := range records {
+		peer := probe.NewPeer(r[0], r[1], r[2], r[3])
+		result = append(result, peer)
+	}
+
+	return result, nil
+}
+
 func main() {
 
 	// parse command line arguments
-	url := flag.String("json", "", "JSON IXP-F File")
+	csvFile := flag.String("csv", "peers.csv", "Peer list in CSV format")
 	count := flag.Int("count", 10, "Number of ICMP pings to send")
 	flag.Parse()
 
 	// retrieve peers from json file
-	peers, _ := parseUrl(*url)
+	peers, err := importCSVPeers(*csvFile)
+	if err != nil {
+		fmt.Printf("Unable to import CSV file: %s", err)
+		os.Exit(1)
+	}
 
 	for {
 		// main peers loop
@@ -44,7 +73,7 @@ func main() {
 		for _, peer := range peers {
 			last := peer.LastSample()
 			fmt.Printf("=== Last Statistics for peer: %s (%s) ===\n", peer.Name(), peer.V4Address())
-			fmt.Printf("RTT (ms) min: %.2f, max: %.2f, avg: %.2f, dev: %.2f | LOSS: %.2f\n",
+			fmt.Printf("RTT min: %.2f, max: %.2f, avg: %.2f, dev: %.2f ms | LOSS: %.2f %%\n",
 				last.Min(), last.Max(), last.Avg(), last.StdDev(), last.Loss())
 		}
 	}

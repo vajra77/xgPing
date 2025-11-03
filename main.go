@@ -1,7 +1,6 @@
 package main
 
 import (
-	"encoding/csv"
 	"flag"
 	"fmt"
 	"os"
@@ -10,47 +9,29 @@ import (
 	"xgPing/probe"
 )
 
-func importCSVPeers(filename string) ([]*probe.Peer, error) {
-	result := make([]*probe.Peer, 0)
-
-	file, err := os.Open(filename)
-	if err != nil {
-		return result, err
-	}
-	defer func(file *os.File) {
-		err := file.Close()
-		if err != nil {
-			fmt.Printf("[W] Error closing file: %s\n", err)
-		}
-	}(file)
-
-	reader := csv.NewReader(file)
-	reader.Comma = ';'
-
-	records, err := reader.ReadAll()
-	if err != nil {
-		return result, err
-	}
-	for _, r := range records {
-		peer := probe.NewPeer(r[0], r[1], r[2], r[3])
-		result = append(result, peer)
-	}
-
-	return result, nil
-}
-
 func main() {
 
 	// parse command line arguments
-	csvFile := flag.String("csv", "peers.csv", "Peer list in CSV format")
+	src := flag.String("source", "", "Import peers from source")
+	srcFmt := flag.String("format", "", "Format of source for import: json or csv")
+	ixpId := flag.Int("ixp-id", 1, "Import peers from IXP ID")
+	vlanId := flag.Int("vlan-id", 1, "Import peers from VLAN ID")
 	count := flag.Int("count", 10, "Number of ICMP pings to send")
 	ttl := flag.Int("ttl", 1, "TTL for ICMP pings")
+
 	flag.Parse()
 
-	// retrieve peers from json file
-	peers, err := importCSVPeers(*csvFile)
+	var peers []*probe.Peer
+	var err error
+
+	switch *srcFmt {
+	case "json":
+		peers, err = ImportJSONPeers(*src, *ixpId, *vlanId)
+	case "csv":
+		peers, err = ImportCSVPeers(*src)
+	}
 	if err != nil {
-		fmt.Printf("Unable to import CSV file: %s", err)
+		fmt.Printf("Unable to import peers from source: %s", err)
 		os.Exit(1)
 	}
 

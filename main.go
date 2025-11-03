@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 	"sync"
 	"time"
 	"xgPing/probe"
@@ -12,9 +13,8 @@ import (
 func main() {
 
 	// parse command line arguments
-	src := flag.String("input", "", "Input for importing peers' data")
-	srcFmt := flag.String("format", "", "Format of input for import: json or csv")
-	output := flag.String("output", "xgping.csv", "Output filename")
+	input := flag.String("input", "peers.csv", "Input source for importing peers' data; may be either an url pointing to a JSON resource or local path of CSV file")
+	output := flag.String("output", "result.csv", "Output filename")
 	ixpId := flag.Int("ixp-id", 1, "Import peers from IXP ID")
 	vlanId := flag.Int("vlan-id", 1, "Import peers from VLAN ID")
 	count := flag.Int("count", 10, "Number of ICMP pings to send")
@@ -25,11 +25,10 @@ func main() {
 	var peers []*probe.Peer
 	var err error
 
-	switch *srcFmt {
-	case "json":
-		peers, err = ImportJSONPeers(*src, *ixpId, *vlanId)
-	case "csv":
-		peers, err = ImportCSVPeers(*src)
+	if strings.Contains(*input, "http") {
+		peers, err = ImportJSONPeers(*input, *ixpId, *vlanId)
+	} else {
+		peers, err = ImportCSVPeers(*input)
 	}
 	if err != nil {
 		fmt.Printf("Unable to import peers from input: %s\n", err)

@@ -41,7 +41,7 @@ func main() {
 		wg.Add(1)
 		fmt.Printf("Pinging peer: %s\n", peer.Name())
 		go peer.Ping(*count, *ttl, &wg)
-		time.Sleep(5 * time.Millisecond)
+		time.Sleep(300 * time.Millisecond)
 	}
 
 	wg.Wait()
